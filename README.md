@@ -26,3 +26,11 @@ District support staff, central office teams, and others exploring how AI can (o
 2. Set your OpenAI API key:
    ```bash
    export OPENAI_API_KEY=your-key-here
+Run the app:
+
+bash
+Copy
+Edit
+streamlit run app.py
+📫 Contact
+Questions? Contact Ben Baldizon, Program Manager for AI Innovation & Capacity Building.
