@@ -1,6 +1,9 @@
 import streamlit as st
 import openai
 import os
+import requests
+from PIL import Image
+from io import BytesIO
 
 # Set your OpenAI API key securely in Streamlit Cloud
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -22,6 +25,41 @@ with st.sidebar:
     st.header("User Info")
     user_name = st.text_input("Your name")
     user_email = st.text_input("Your district email")
+
+# Tool Panel
+st.subheader("🧰 Optional Tools")
+st.markdown("Use these only if the assistant suggests or you feel it will help.")
+
+uploaded_file = st.file_uploader("📄 Upload a file (PDF, DOCX, TXT)")
+search_query = st.text_input("🌐 Enter a web search query (optional)")
+generate_image_prompt = st.text_input("🎨 Image prompt (optional)")
+
+# Process tool inputs
+tool_inputs = []
+if uploaded_file is not None:
+    content = uploaded_file.read().decode(errors="ignore")
+    tool_inputs.append(f"The user uploaded a file with content:\n{content[:1000]}")
+
+if search_query:
+    try:
+        serp_api_key = st.secrets["SERP_API_KEY"]
+        serp_url = f"https://serpapi.com/search.json?q={search_query}&api_key={serp_api_key}"
+        result = requests.get(serp_url).json()
+        snippets = [res['snippet'] for res in result.get('organic_results', []) if 'snippet' in res]
+        search_result = "\n\n".join(snippets[:5])
+        tool_inputs.append(f"Search results for '{search_query}':\n{search_result}")
+    except:
+        tool_inputs.append("Web search failed.")
+
+if generate_image_prompt:
+    try:
+        image_response = openai.Image.create(prompt=generate_image_prompt, n=1, size="512x512")
+        image_url = image_response['data'][0]['url']
+        image = Image.open(BytesIO(requests.get(image_url).content))
+        st.image(image, caption="Generated Image")
+        tool_inputs.append(f"Generated image from prompt: {generate_image_prompt}")
+    except:
+        st.error("Image generation failed.")
 
 # Initialize session state for messages
 if "messages" not in st.session_state:
@@ -57,7 +95,10 @@ This tool was designed for MESD staff and partners. Refer users to Ben Baldizon 
 user_input = st.chat_input("What's your project or challenge?")
 if user_input:
     user_identity = f"User: {user_name}, Email: {user_email}"
-    st.session_state.messages.append({"role": "user", "content": user_identity + "\n\n" + user_input})
+    full_input = user_identity + "\n\n" + user_input
+    if tool_inputs:
+        full_input += "\n\n" + "\n\n".join(tool_inputs)
+    st.session_state.messages.append({"role": "user", "content": full_input})
 
     with st.spinner("Thinking through your AI options..."):
         response = openai.ChatCompletion.create(
