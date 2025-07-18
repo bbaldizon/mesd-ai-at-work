@@ -4,6 +4,9 @@ import os
 import requests
 from PIL import Image
 from io import BytesIO
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from datetime import datetime
 
 # Set your OpenAI API key securely in Streamlit Cloud
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -25,6 +28,22 @@ with st.sidebar:
     st.header("User Info")
     user_name = st.text_input("Your name")
     user_email = st.text_input("Your district email")
+
+# Log access to Google Sheet
+def log_to_gsheet(name, email):
+    try:
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["GSHEET_CREDS"], scope)
+        client = gspread.authorize(creds)
+        sheet = client.open("MESD AI Access Log").sheet1
+        sheet.append_row([str(datetime.now()), name, email])
+    except Exception as e:
+        st.error(f"Failed to log access: {e}")
+
+if user_name and user_email:
+    if "logged" not in st.session_state:
+        log_to_gsheet(user_name, user_email)
+        st.session_state.logged = True
 
 # Tool Panel
 st.subheader("🧰 Optional Tools")
