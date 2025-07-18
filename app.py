@@ -14,8 +14,10 @@ client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # Google Sheets logging setup
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds_dict = dict(st.secrets["GSHEET_CREDS"])
-creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+creds = ServiceAccountCredentials.from_json_keyfile_dict(
+    st.secrets["GSHEET_CREDS"],
+    ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
+)
 gs_client = gspread.authorize(creds)
 sheet = gs_client.open("MESD AI Access Log").sheet1
 
