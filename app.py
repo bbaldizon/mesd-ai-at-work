@@ -30,7 +30,11 @@ with st.sidebar:
     user_email = st.text_input("Your district email")
 
 # Google Sheets logging setup
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+scope = [
+  "https://spreadsheets.google.com/feeds",
+  "https://www.googleapis.com/auth/drive",
+  "https://www.googleapis.com/auth/spreadsheets.readonly"
+]
 creds_dict = json.loads(st.secrets["GSHEET_JSON"])
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 gs_client = gspread.authorize(creds)
