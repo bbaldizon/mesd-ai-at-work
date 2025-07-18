@@ -1,15 +1,23 @@
 import streamlit as st
-import openai
 import os
 import requests
 from PIL import Image
 from io import BytesIO
+from datetime import datetime
+from openai import OpenAI
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime
+import json
 
-# Set your OpenAI API key securely in Streamlit Cloud
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+# Set up OpenAI and Google Sheets
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+# Google Sheets logging setup
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+creds_dict = dict(st.secrets["GSHEET_CREDS"])
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+gs_client = gspread.authorize(creds)
+sheet = gs_client.open("MESD AI Access Log").sheet1
 
 st.set_page_config(page_title="Should This Be AI?", layout="centered")
 st.title("🤖 Should This Be AI?")
@@ -29,21 +37,16 @@ with st.sidebar:
     user_name = st.text_input("Your name")
     user_email = st.text_input("Your district email")
 
-# Log access to Google Sheet
-def log_to_gsheet(name, email):
-    try:
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["GSHEET_CREDS"], scope)
-        client = gspread.authorize(creds)
-        sheet = client.open("MESD AI Access Log").sheet1
-        sheet.append_row([str(datetime.now()), name, email])
-    except Exception as e:
-        st.error(f"Failed to log access: {e}")
+# Require name/email before proceeding
+if not user_name or not user_email:
+    st.warning("Please enter your name and district email before using the assistant.")
+    st.stop()
 
-if user_name and user_email:
-    if "logged" not in st.session_state:
-        log_to_gsheet(user_name, user_email)
-        st.session_state.logged = True
+# Log to Google Sheet if not already logged this session
+if "user_logged" not in st.session_state:
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    sheet.append_row([timestamp, user_name, user_email])
+    st.session_state.user_logged = True
 
 # Tool Panel
 st.subheader("🧰 Optional Tools")
@@ -72,8 +75,8 @@ if search_query:
 
 if generate_image_prompt:
     try:
-        image_response = openai.Image.create(prompt=generate_image_prompt, n=1, size="512x512")
-        image_url = image_response['data'][0]['url']
+        image_response = client.images.generate(prompt=generate_image_prompt, n=1, size="512x512")
+        image_url = image_response.data[0].url
         image = Image.open(BytesIO(requests.get(image_url).content))
         st.image(image, caption="Generated Image")
         tool_inputs.append(f"Generated image from prompt: {generate_image_prompt}")
@@ -120,7 +123,7 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": full_input})
 
     with st.spinner("Thinking through your AI options..."):
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=st.session_state.messages,
             temperature=0.7,
