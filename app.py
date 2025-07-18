@@ -34,7 +34,7 @@ scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/au
 creds_dict = json.loads(st.secrets["GSHEET_JSON"])
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 gs_client = gspread.authorize(creds)
-sheet = gs_client.open("MESD AI Access Log").sheet1
+sheet = gs_client.open("MESD AI Tools access log").sheet1
 
 # Tool Panel
 st.subheader("🧰 Optional Tools")
