@@ -38,7 +38,7 @@ scope = [
 creds_dict = json.loads(st.secrets["GSHEET_JSON"])
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 gs_client = gspread.authorize(creds)
-spreadsheet_id = "14vkdhWw1u_OCj64OQ9ZGLwj9aNd4tHSN4l6bWh4hzxY"
+spreadsheet_id = "1nsQnALEVX64bRAnjjNrrzPFRda7gsHeL7qwqgnqJ8pY"
 sheet = gs_client.open_by_key(spreadsheet_id).sheet1
 
 # Tool Panel
