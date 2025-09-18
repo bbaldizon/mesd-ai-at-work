@@ -30,16 +30,16 @@ with st.sidebar:
     user_email = st.text_input("Your district email")
 
 # Google Sheets logging setup
-scope = [
-  "https://spreadsheets.google.com/feeds",
-  "https://www.googleapis.com/auth/drive",
-  "https://www.googleapis.com/auth/spreadsheets.readonly"
-]
-creds_dict = json.loads(st.secrets["GSHEET_JSON"])
-creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-gs_client = gspread.authorize(creds)
-spreadsheet_id = "1nsQnALEVX64bRAnjjNrrzPFRda7gsHeL7qwqgnqJ8pY"
-sheet = gs_client.open_by_key(spreadsheet_id).sheet1
+# scope = [
+#   "https://spreadsheets.google.com/feeds",
+#   "https://www.googleapis.com/auth/drive",
+#   "https://www.googleapis.com/auth/spreadsheets.readonly"
+# ]
+# creds_dict = json.loads(st.secrets["GSHEET_JSON"])
+# creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+# gs_client = gspread.authorize(creds)
+# spreadsheet_id = "1nsQnALEVX64bRAnjjNrrzPFRda7gsHeL7qwqgnqJ8pY"
+# sheet = gs_client.open_by_key(spreadsheet_id).sheet1
 
 # Tool Panel
 st.subheader("🧰 Optional Tools")
@@ -116,7 +116,7 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": full_input})
 
     # Log to Google Sheet
-    sheet.append_row([user_name, user_email, user_input])
+    # sheet.append_row([user_name, user_email, user_input])
 
     with st.spinner("Thinking through your AI options..."):
         response = openai.chat.completions.create(
