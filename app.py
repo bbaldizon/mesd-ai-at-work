@@ -9,8 +9,7 @@ from io import BytesIO
 st.set_page_config(page_title="Custom GPT Assistant", layout="centered")
 st.title("🎯 Build Your Custom GPT")
 st.markdown("""
-This assistant helps you design your own custom GPT by walking through key setup questions. 
-Answer naturally and revise at the end before copying your instructions into the custom GPT builder.
+This assistant helps you explore where/how AI might be helpful at work. You can ask it about a specific idea you have, have it ask you some discovery questions about common uses, or tell it what you do in general and have it help think through where AI might be useful
 """)
 
 # Feature toggles
