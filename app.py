@@ -7,7 +7,7 @@ from PIL import Image
 from io import BytesIO
 
 st.set_page_config(page_title="Custom GPT Assistant", layout="centered")
-st.title("🎯 Build Your Custom GPT")
+st.title("How Can AI Help You In Your Job?")
 st.markdown("""
 This assistant helps you explore where/how AI might be helpful at work. You can ask it about a specific idea you have, have it ask you some discovery questions about common uses, or tell it what you do in general and have it help think through where AI might be useful
 """)
